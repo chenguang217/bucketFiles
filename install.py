@@ -1,13 +1,8 @@
 import os
 import sys
-import time
-import re
 
-import requests
-from lxml import etree
-from requests.models import Response
 import rarfile
-import shutil
+import requests
 
 if __name__ == "__main__":
     os.chdir(sys.argv[1])
@@ -35,7 +30,6 @@ if __name__ == "__main__":
     }
     response = session.post(url, headers=headers, data=data)
     text = response.json()
-    print(text)
     link = text['data']['redrUrl']
     os.system('wget -O tmp.zip "' + link + '"')
     os.system('7z x tmp.zip')
