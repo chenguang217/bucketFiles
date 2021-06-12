@@ -12,6 +12,8 @@ if __name__ == "__main__":
     userName = config.get('baseconf', 'userName')
     persist = config.get('baseconf', 'persist')
     url = sys.argv[1]
+    # with open(os.path.split(os.path.realpath(__file__))[0] + '\\tmp.log', 'w') as file:
+    #     file.write(url)
     try:
         domain = re.search(r'(http://.+)/emby', url).group(1)
     except:
@@ -27,8 +29,14 @@ if __name__ == "__main__":
     with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayerMini64.dpl', 'r', encoding='utf-8-sig') as file:
         content = file.read()
         playtime = int(re.search(r'playtime=(\d+)', content).group(1))
+        endtime = int(re.search(r'1\*duration2\*(\d+)', content).group(1))
     tmp = url.split(' ')
     tmp = tmp[0]
     item = tmp.split('/')[5]
-    response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': playtime * 10000}, proxies={'http': None, 'https': None})
-    print(response)
+    if endtime - playtime > 180000:
+        response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': playtime * 10000}, proxies={'http': None, 'https': None})
+        print(response)
+    else:
+        response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None})
+        print(response)
+    
