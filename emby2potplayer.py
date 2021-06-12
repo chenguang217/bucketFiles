@@ -12,7 +12,10 @@ if __name__ == "__main__":
     userName = config.get('baseconf', 'userName')
     persist = config.get('baseconf', 'persist')
     url = sys.argv[1]
-    domain = re.search(r'(https://.+)/emby', url).group(1)
+    try:
+        domain = re.search(r'(http://.+)/emby', url).group(1)
+    except:
+        domain = re.search(r'(https://.+)/emby', url).group(1)
     session = requests.session()
     response = session.get(domain + '/emby/users?api_key=' + token, proxies={'http': None, 'https': None})
     for item in response.json():
