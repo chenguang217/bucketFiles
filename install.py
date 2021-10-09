@@ -4,6 +4,18 @@ import sys
 import rarfile
 import requests
 
+def getCookie(cookie_string):
+    cookie_string = cookie_string.strip('\n').strip()
+    cookie_list = cookie_string.split(';')
+    cookie_new_list = [i.strip('\n').strip() for i in cookie_list]
+    cookie_dict = {}
+    for ck in cookie_new_list:
+        if '=' in ck:
+            # 如果有两个=，那么只选最左边的切
+            ck_list = ck.split('=', 1)
+            cookie_dict[ck_list[0]] = ck_list[1]
+    return cookie_dict
+
 if __name__ == "__main__":
     os.chdir(sys.argv[1])
     if 'http' in sys.argv[2]:
@@ -39,7 +51,9 @@ if __name__ == "__main__":
             'linkId': linkId,
             'contentIds': contentIds
         }
-        response = session.post(url, headers=headers, data=data)
+        cookies = input('输入和彩云cookies: ')
+        cookies = getCookie(cookies)
+        response = session.post(url, headers=headers, data=data, cookies=cookies)
         text = response.json()
         link = text['data']['redrUrl']
         os.system('wget -O tmp.zip "' + link + '"')
