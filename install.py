@@ -3,6 +3,7 @@ import sys
 
 import rarfile
 import requests
+import zipfile
 
 def getCookie(cookie_string):
     cookie_string = cookie_string.strip('\n').strip()
@@ -22,6 +23,19 @@ if __name__ == "__main__":
         os.system('wget -O tmp.zip "' + sys.argv[2] + '"')
         os.system('7z x tmp.zip')
         file = rarfile.RarFile('tmp.zip')
+        for f in file.infolist():
+            dir = f.filename.split('/')[0]
+            break
+        os.system('mv ' + dir + '/* ./')
+        os.removedirs(dir)
+        os.remove('tmp.zip')
+    elif 'adycloud' in sys.argv[2]:
+        linkId = sys.argv[2].split('/')[1]
+        response = session.put('https://pan.adycloud.com/api/v3/share/download/' + linkId)
+        link = response.json()['data']
+        os.system('wget -O tmp.zip "' + link + '"')
+        os.system('7z x tmp.zip')
+        file = zipfile.ZipFile('tmp.zip')
         for f in file.infolist():
             dir = f.filename.split('/')[0]
             break
