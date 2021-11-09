@@ -15,9 +15,9 @@ if __name__ == "__main__":
     # with open(os.path.split(os.path.realpath(__file__))[0] + '\\tmp.log', 'w') as file:
     #     file.write(url)
     try:
-        domain = re.search(r'(http://.+)/emby', url).group(1)
+        domain = re.search(r'(http://.+?)/emby', url).group(1)
     except:
-        domain = re.search(r'(https://.+)/emby', url).group(1)
+        domain = re.search(r'(https://.+?)/emby', url).group(1)
     session = requests.session()
     response = session.get(domain + '/emby/users?api_key=' + token, proxies={'http': None, 'https': None})
     for item in response.json():
@@ -25,8 +25,8 @@ if __name__ == "__main__":
             userId = item['Id']
             break
     url = url.replace('emby://', '').replace('%20', ' ')
-    os.system(persist + '\\apps\\potplayer\\current\\PotPlayerMini64.exe "' + url + '"')
-    with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayerMini64.dpl', 'r', encoding='utf-8-sig') as file:
+    os.system(persist + '\\apps\\potplayer\\current\\PotPlayer.exe "' + url + '"')
+    with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayer.dpl', 'r', encoding='utf-8-sig') as file:
         content = file.read()
         playtime = int(re.search(r'playtime=(\d+)', content).group(1))
         endtime = int(re.search(r'1\*duration2\*(\d+)', content).group(1))
