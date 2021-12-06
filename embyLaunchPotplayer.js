@@ -47,11 +47,20 @@ function getSeek(){
     let resumeButton = document.querySelector("div[is='emby-scroller']:not(.hide) div.resumeButtonText");
     let seek = '';
     if (resumeButton) {
-        if (resumeButton.innerText.includes('恢复播放于')) {
-            seek = resumeButton.innerText.replace('恢复播放于', '');
+        if (resumeButton.innerText.includes('恢复播放')) {
+            seek = resumeButton.innerText.replace('恢复播放', '').replace('从', '').replace(' ', '');
         }
     }
     return seek;
+}
+
+function getHDR(){
+    let result = document.evaluate('/html/body/div[5]/div/div/div[1]/div[2]/div[2]/div[2]/form/div[2]/select/option[1]', document).iterateNext()
+    let hdr = '';
+    if (result.innerText.includes('HDR')) {
+        hdr = 'hdr';
+    }
+    return hdr;
 }
 
 function getSubUrl(itemInfo, MediaSourceIndex){
@@ -95,7 +104,8 @@ async function getEmbyMediaUrl() {
 
 async function embyPot() {
     let mediaUrl = await getEmbyMediaUrl();
-    let poturl = `emby://${encodeURI(mediaUrl[0])} /sub=${encodeURI(mediaUrl[1])} /current /seek=${getSeek()}`;
+    let poturl = `emby://${encodeURI(mediaUrl[0])} /sub=${encodeURI(mediaUrl[1])} /current /seek=${getSeek()} ${getHDR()}`;
     console.log(poturl);
+    console.log(getHDR());
     window.open(poturl, "_blank");
 }
