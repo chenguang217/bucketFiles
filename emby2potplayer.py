@@ -25,11 +25,19 @@ if __name__ == "__main__":
             userId = item['Id']
             break
     url = url.replace('emby://', '').replace('%20', ' ')
-    config1= configparser.RawConfigParser()
-    config1.optionxform = lambda option: option
-    config1.read(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', encoding="utf-16")
-    config1.remove_option('Settings', 'VideoRen2')
-    config1.write(open(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', "w", encoding="utf-16"), space_around_delimiters=False)
+    if 'hdr' in url:
+        config1= configparser.RawConfigParser()
+        config1.optionxform = lambda option: option
+        config1.read(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', encoding="utf-16")
+        config1.set('Settings', 'VideoRen2', '15')
+        config1.write(open(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', "w", encoding="utf-16"), space_around_delimiters=False)
+    else:
+        config1= configparser.RawConfigParser()
+        config1.optionxform = lambda option: option
+        config1.read(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', encoding="utf-16")
+        config1.remove_option('Settings', 'VideoRen2')
+        config1.write(open(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', "w", encoding="utf-16"), space_around_delimiters=False)
+    url = url.replace(' hdr', '')
     os.system(persist + '\\apps\\potplayer\\current\\PotPlayer64.exe "' + url + '"')
     with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayer64.dpl', 'r', encoding='utf-8-sig') as file:
         content = file.read()
@@ -44,4 +52,3 @@ if __name__ == "__main__":
     else:
         response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None})
         print(response)
-    
