@@ -25,6 +25,10 @@ if __name__ == "__main__":
             userId = item['Id']
             break
     url = url.replace('emby://', '').replace('%20', ' ')
+    config1 = configparser.ConfigParser()
+    config1.read(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', encoding="utf-16")
+    config1.remove_option('Settings', 'VideoRen2')
+    config1.write(open(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', "w", encoding="utf-16"), space_around_delimiters=False)
     os.system(persist + '\\apps\\potplayer\\current\\PotPlayer.exe "' + url + '"')
     with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayer.dpl', 'r', encoding='utf-8-sig') as file:
         content = file.read()
