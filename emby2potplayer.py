@@ -29,8 +29,8 @@ if __name__ == "__main__":
     config1.read(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', encoding="utf-16")
     config1.remove_option('Settings', 'VideoRen2')
     config1.write(open(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', "w", encoding="utf-16"), space_around_delimiters=False)
-    os.system(persist + '\\apps\\potplayer\\current\\PotPlayer.exe "' + url + '"')
-    with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayer.dpl', 'r', encoding='utf-8-sig') as file:
+    os.system(persist + '\\apps\\potplayer\\current\\PotPlayer64.exe "' + url + '"')
+    with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayer64.dpl', 'r', encoding='utf-8-sig') as file:
         content = file.read()
         playtime = int(re.search(r'playtime=(\d+)', content).group(1))
         endtime = int(re.search(r'1\*duration2\*(\d+)', content).group(1))
