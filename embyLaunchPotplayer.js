@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 //修改此处api_key为你自己的
-const api_key = "7753ae02845a4e968eeb39aca46c03e3";
+const api_key = "";
 
 const reg = /\/[a-z]{2,}\/\S*?id=/;
 
@@ -20,12 +20,18 @@ let timer = setInterval(function() {
     let potplayer = document.querySelectorAll("div[is='emby-scroller']:not(.hide) .potplayer")[0];
     if(!potplayer){
         let mainDetailButtons = document.querySelectorAll("div[is='emby-scroller']:not(.hide) .mainDetailButtons")[0];
-        if(mainDetailButtons){
+		let playable = document.querySelectorAll("div[is='emby-scroller']:not(.hide) .mainDetailButtons > button:not(.hide)")[0];
+        if(playable.textContent.indexOf('恢复播放\n') != -1 || playable.textContent.indexOf('\n                                    播放\n') != -1){
             let buttonhtml = `<div class ="flex">
                   <button id="embyPot" type="button" class="detailButton  emby-button potplayer" title="Potplayer"> <div class="detailButton-content"> <i class="md-icon detailButton-icon"></i>  <div class="detailButton-text">PotPlayer</div> </div> </button>
                  </div>`
-            mainDetailButtons.insertAdjacentHTML('afterend', buttonhtml)
-            document.querySelector("div[is='emby-scroller']:not(.hide) #embyPot").onclick = embyPot;
+            mainDetailButtons.insertAdjacentHTML('afterend', buttonhtml);
+			let season = document.querySelectorAll("div[is='emby-scroller']:not(.hide) .flex-direction-row > div > div> div > h1 > a:nth-child(2)")[0];
+			if(season){
+				document.querySelector("div[is='emby-scroller']:not(.hide) #embyPot").onclick = embyPot;
+			}else{
+				document.querySelector("div[is='emby-scroller']:not(.hide) #embyPot").onclick = embyPot;
+			};
         }
     }
 }, 1000)
