@@ -1,9 +1,9 @@
 import configparser
-import multiprocessing
 import os
 import re
 import subprocess
 import sys
+import threading
 import time
 
 import requests
@@ -25,7 +25,8 @@ def appends(url, token, domain, userId, persist):
     time.sleep(3)
     itemId = url.split('/')[7]
     response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token)
-    global PID
+    global episodes
+    episodes.append(url.replace('emby://', '').replace('%20', ' '))
     try:
         seriesId = response.json()['Items'][0]['SeriesId']
         seasonId = response.json()['Items'][0]['SeasonId']
@@ -56,12 +57,12 @@ def appends(url, token, domain, userId, persist):
                         print(line)
                         os.system(persist + '\\apps\\potplayer\\current\\PotPlayer64.exe "' + episode + '" /sub="' + subtitle + '" /add')
             episodes.append(episode)
-            print(episode)
+            print(episodes)
             time.sleep(1)
     except:
         pass
 
-t = multiprocessing.Process(target=d11)
+t = threading.Thread(target=d11)
 
 
 if __name__ == "__main__":
@@ -71,7 +72,6 @@ if __name__ == "__main__":
     userName = config.get('baseconf', 'userName')
     persist = config.get('baseconf', 'persist')
     url = sys.argv[1]
-    episodes.append(url.replace('emby://', '').replace('%20', ' '))
     # with open(os.path.split(os.path.realpath(__file__))[0] + '\\tmp.log', 'w') as file:
     #     file.write(url)
     try:
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         if item['Name'] == userName:
             userId = item['Id']
             break
-    t2 = multiprocessing.Process(target=appends, args=(url, token, domain, userId, persist,))
+    t2 = threading.Thread(target=appends, args=(url, token, domain, userId, persist,))
     url = url.replace('emby://', '').replace('%20', ' ')
     if 'hdr' in url:
         config1= configparser.RawConfigParser()
@@ -99,12 +99,13 @@ if __name__ == "__main__":
         config1.read(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', encoding="utf-16")
         config1.remove_option('Settings', 'VideoRen2')
         config1.write(open(persist + '\\apps\\potplayer\\current\\PotPlayer64.ini', "w", encoding="utf-16"), space_around_delimiters=False)
+        t.setDaemon(True)
         t.start()
     url = url.replace(' hdr', '')
     time.sleep(1.5)
+    t2.setDaemon(True)
     t2.start()
     os.system(persist + '\\apps\\potplayer\\current\\PotPlayer64.exe "' + url + '"')
-    t2.terminate()
     os.system('taskkill /F /IM HDRSwitch.exe')
     os.system('taskkill /F /IM PotPlayer64.exe')
     with open(persist + '\\persist\\potplayer\\Playlist\\PotPlayer64.dpl', 'r', encoding='utf-8-sig') as file:
