@@ -133,7 +133,8 @@ if __name__ == "__main__":
                     state = 'UnPlayed'
                 item = episodes[i].split('/')[5]
                 if state == 'Progress':
-                    response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000}, proxies={'http': None, 'https': None})
+                    response = session.get(domain + '/emby/Users/' + userId + '/Items?Ids=' + item + '&api_key=' + token)
+                    response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000, 'Played': response.json()['Items'][0]['UserData']['Played']}, proxies={'http': None, 'https': None})
                 elif state == 'Finished':
                     response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None})
                 print(response.text)
