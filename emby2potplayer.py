@@ -8,6 +8,7 @@ import time
 
 import requests
 from pykeyboard import *
+import datetime
 
 episodes = []
 PID = ''
@@ -129,12 +130,14 @@ if __name__ == "__main__":
                         playtime = re.search(str(i + 1) + r'\*played\*(\d)', content)
                         if playtime != None:
                             state = 'Finished'
+                        elif len(episodes) == 1:
+                            state = 'Finished'
                 except:
                     state = 'UnPlayed'
                 item = episodes[i].split('/')[5]
                 if state == 'Progress':
                     response = session.get(domain + '/emby/Users/' + userId + '/Items?Ids=' + item + '&api_key=' + token)
-                    response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000, 'Played': response.json()['Items'][0]['UserData']['Played']}, proxies={'http': None, 'https': None})
+                    response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000, 'Played': response.json()['Items'][0]['UserData']['Played'], "LastPlayedDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.0000000+00:00")}, proxies={'http': None, 'https': None})
                 elif state == 'Finished':
                     response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None})
                 print(response.text)
