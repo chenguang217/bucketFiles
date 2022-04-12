@@ -114,11 +114,15 @@ if __name__ == "__main__":
     position = parameter[3].replace('/seek=', '')
     if len(position.split(':')) == 2:
         position = '00:' + position
-    sub = parameter[1].replace('/sub=', '')
-    if sub == '':
-        os.system(persist + '\\apps\\mpc-be\\current\\mpc-be64.exe "' + target + '" /startpos ' + position)
+    if len(position) == 0:
+        position = ''
     else:
-        os.system(persist + '\\apps\\mpc-be\\current\\mpc-be64.exe "' + target + '" /startpos ' + position + ' /sub "' + sub + '"')
+        position = ' /startpos ' + position
+    if len(parameter[1].replace('/sub=', '')) == 0:
+        sub = ''
+    else:
+        sub = ' /sub "' + parameter[1].replace('/sub=', '') + '"'
+    os.system(persist + '\\apps\\mpc-be\\current\\mpc-be64.exe "' + target + '"' + position + sub)
     Mark(episodes)
     with open(persist + '\\persist\\mpc-be\\history.mpc_lst', 'w', encoding='utf-8') as file:
         pass
