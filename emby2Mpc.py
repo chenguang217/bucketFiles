@@ -73,10 +73,19 @@ def Mark(episodes):
                 if playtime == None:
                     state = 'Finished'
                 else:
-                    state = 'Progress'
                     duration = playtime.group(1).split(':')
                     duration = int(duration[0]) * 3600 + int(duration[1]) * 60 + int(duration[2])
                     duration *= 1000
+                    with open(persist + '\\persist\\mpc-be\\Default.mpcpl', 'r', encoding='utf-8') as file2:
+                        content2 = file2.read()
+                        periodEnd2 = content2.index(episodes[i])
+                        periodStart2 = content2[:periodEnd2].rindex('time')
+                        length = re.search(r'time,(.+?)\n', content2[periodStart2:periodEnd2]).group(1)
+                        length = int(length.split(':')[0]) * 3600000 + int(length.split(':')[1]) * 60000 + int(length.split(':')[2]) * 1000
+                    if length - duration > 180000:
+                        state = 'Progress'
+                    else:
+                        state = 'Finished'
             except:
                 state = 'UnPlayed'
             item = episodes[i].split('/')[5]
