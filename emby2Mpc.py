@@ -44,7 +44,7 @@ def Mark(episodes):
             item = episodes[i].split('/')[5]
             print(state)
             if state == 'Progress':
-                response = session.get(domain + '/emby/Users/' + userId + '/Items?Ids=' + item + '&api_key=' + token)
+                response = session.get(domain + '/emby/Users/' + userId + '/Items?Ids=' + item + '&api_key=' + token, proxies={'http': None, 'https': None})
                 response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000, 'Played': response.json()['Items'][0]['UserData']['Played'], "LastPlayedDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.0000000+00:00")}, proxies={'http': None, 'https': None})
             elif state == 'Finished':
                 response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None})
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     with open(persist + '\\persist\\mpc-be\\Default.mpcpl', 'w', encoding='utf-8') as file:
         file.write('MPCPLAYLIST\naudio,-1\nsubtitles,-1\n1,type,0\n')
         itemId = url.split('/')[5]
-        response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token)
+        response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None})
         file.write('1,label,' + response.json()['Items'][0]['Name'] + '\n1,filename,' + target + '\n')
         if len(parameter[1].replace('/sub=', '')) != 0:
             file.write('1,subtitle,' + parameter[1].replace('/sub=', '') + '\n')
@@ -91,14 +91,14 @@ if __name__ == "__main__":
         try:
             seriesId = response.json()['Items'][0]['SeriesId']
             seasonId = response.json()['Items'][0]['SeasonId']
-            response = requests.get(domain + '/emby/Shows/' + seriesId + '/Episodes?SeasonId=' + seasonId + '&StartItemId=' + itemId + '&api_key=' + token)
+            response = requests.get(domain + '/emby/Shows/' + seriesId + '/Episodes?SeasonId=' + seasonId + '&StartItemId=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None})
             for item in response.json()['Items']:
                 if item['Id'] == itemId:
                     continue
-                response = requests.get(domain + '/emby/Items/' + item['Id'] + '/PlaybackInfo?api_key=' + token)
+                response = requests.get(domain + '/emby/Items/' + item['Id'] + '/PlaybackInfo?api_key=' + token, proxies={'http': None, 'https': None})
                 Container = response.json()['MediaSources'][0]['Container']
                 episode = domain + '/emby/videos/' + item['Id'] + '/stream.' + Container + '?Static=true&api_key=' + token
-                response = requests.get(domain + '/emby/Users/' + userId + '/Items/' + item['Id'] + '?&api_key=' + token)
+                response = requests.get(domain + '/emby/Users/' + userId + '/Items/' + item['Id'] + '?&api_key=' + token, proxies={'http': None, 'https': None})
                 ifSub = False
                 for media in response.json()["MediaSources"][0]['MediaStreams']:
                     if media["Type"] == "Subtitle":
