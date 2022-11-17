@@ -142,11 +142,12 @@ if __name__ == "__main__":
                 episodes.append(episode)
         except:
             pass
-    thread = threading.Thread(target=start)
-    thread.start()
+    thread2 = threading.Thread(target=start)
+    thread2.start()
     for thread in record:
         thread.setDaemon(True)
         thread.start()
+    thread2.join()
     Mark(episodes)
     with open(persist + '\\persist\\mpc-be\\history.mpc_lst', 'w', encoding='utf-8') as file:
         pass
