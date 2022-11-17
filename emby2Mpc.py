@@ -3,12 +3,14 @@ import os
 import re
 import sys
 import time
+import threading
 
 import requests
 import datetime
 
 episodes = []
-        
+record = []
+      
 def Mark(episodes):
     with open(persist + '\\persist\\mpc-be\\history.mpc_lst', 'r', encoding='utf-8') as file:
         content = file.read()
@@ -44,11 +46,16 @@ def Mark(episodes):
             item = episodes[i].split('/')[5]
             print(state)
             if state == 'Progress':
-                response = session.get(domain + '/emby/Users/' + userId + '/Items?Ids=' + item + '&api_key=' + token, proxies={'http': None, 'https': None})
-                response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000, 'Played': response.json()['Items'][0]['UserData']['Played'], "LastPlayedDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.0000000+00:00")}, proxies={'http': None, 'https': None})
+                response = session.get(domain + '/emby/Users/' + userId + '/Items?Ids=' + item + '&api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
+                response = session.post(domain + '/emby/users/' + userId + '/Items/' + item + '/UserData?api_key=' + token, data = {'PlaybackPositionTicks': duration * 10000, 'Played': response.json()['Items'][0]['UserData']['Played'], "LastPlayedDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.0000000+00:00")}, proxies={'http': None, 'https': None}, verify = False)
             elif state == 'Finished':
-                response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None})
+                response = session.post(domain + '/emby/Users/' + userId + '/PlayedItems/' + item + '?api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
 
+def accessSub(url):
+    response = requests.get(url, proxies={'http': None, 'https': None}, verify = False)
+
+def start():
+    os.system(persist + '\\apps\\mpc-be\\current\\mpc-be64.exe /play')
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
@@ -62,7 +69,7 @@ if __name__ == "__main__":
     except:
         domain = re.search(r'(https://.+?)/emby', url).group(1)
     session = requests.session()
-    response = session.get(domain + '/emby/users?api_key=' + token, proxies={'http': None, 'https': None})
+    response = session.get(domain + '/emby/users?api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
     for item in response.json():
         if item['Name'] == userName:
             userId = item['Id']
@@ -82,7 +89,7 @@ if __name__ == "__main__":
     with open(persist + '\\persist\\mpc-be\\Default.mpcpl', 'w', encoding='utf-8') as file:
         file.write('MPCPLAYLIST\naudio,-1\nsubtitles,-1\n1,type,0\n')
         itemId = url.split('/')[5]
-        response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None})
+        response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
         file.write('1,label,' + response.json()['Items'][0]['Name'] + '\n1,filename,' + target + '\n')
         if len(parameter[1].replace('/sub=', '')) != 0:
             file.write('1,subtitle,' + parameter[1].replace('/sub=', '') + '\n')
@@ -91,25 +98,41 @@ if __name__ == "__main__":
         try:
             seriesId = response.json()['Items'][0]['SeriesId']
             seasonId = response.json()['Items'][0]['SeasonId']
-            response = requests.get(domain + '/emby/Shows/' + seriesId + '/Episodes?SeasonId=' + seasonId + '&StartItemId=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None})
+            response = requests.get(domain + '/emby/Shows/' + seriesId + '/Episodes?SeasonId=' + seasonId + '&StartItemId=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
             for item in response.json()['Items']:
                 if item['Id'] == itemId:
                     continue
-                response = requests.get(domain + '/emby/Items/' + item['Id'] + '/PlaybackInfo?api_key=' + token, proxies={'http': None, 'https': None})
+                response = requests.get(domain + '/emby/Items/' + item['Id'] + '/PlaybackInfo?api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
                 Container = response.json()['MediaSources'][0]['Container']
                 episode = domain + '/emby/videos/' + item['Id'] + '/stream.' + Container + '?Static=true&api_key=' + token
-                response = requests.get(domain + '/emby/Users/' + userId + '/Items/' + item['Id'] + '?&api_key=' + token, proxies={'http': None, 'https': None})
+                response = requests.get(domain + '/emby/Users/' + userId + '/Items/' + item['Id'] + '?&api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
                 ifSub = False
+                ifExternal = False
+                # print(response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'])
                 for media in response.json()["MediaSources"][0]['MediaStreams']:
                     if media["Type"] == "Subtitle":
-                        try:
-                            path = media["Path"]
+                        if media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['DisplayLanguage'] == 'Chinese Simplified':
+                            print('selected chinese subtitle')
+                            path = media['Codec']
                             ifSub = True
-                            index = media["Index"]
-                        except:
-                            pass
+                            index = media['Index']
+                        elif media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['IsExternal']:
+                            path = media['Codec']
+                            ifSub = True
+                            ifExternal = True
+                            index = media['Index']
+                        elif media['IsExternal'] and not ifExternal:
+                            path = media['Codec']
+                            ifSub = True
+                            index = media['Index']
+                        elif media['DisplayLanguage'] == 'Chinese Simplified':
+                            path = media['Codec']
+                            ifSub = True
+                            index = media['Index']
                 if ifSub:
-                    subtitle = domain + '/emby/videos/' + item['Id'] + response.json()['MediaSources'][0]['Id'] + '/Subtitles/' + str(index) + '/Stream.' + path.split('.')[-1] + '?api_key=' + token
+                    subtitle = domain + '/emby/videos/' + item['Id'] + '/' + response.json()['MediaSources'][0]['Id'] + '/Subtitles/' + str(index) + '/Stream.' + path + '?api_key=' + token
+                    thread = threading.Thread(target=accessSub, args=(subtitle,))
+                    record.append(thread)
                 else:
                     subtitle = ''
                 file.write(str(i) + ',type,0\n' + str(i) + ',label,' + item['Name'] + '\n' + str(i) + ',filename,' + episode + '\n')
@@ -119,8 +142,11 @@ if __name__ == "__main__":
                 episodes.append(episode)
         except:
             pass
-        
-    os.system(persist + '\\apps\\mpc-be\\current\\mpc-be64.exe /play')
+    thread = threading.Thread(target=start)
+    thread.start()
+    for thread in record:
+        thread.setDaemon(True)
+        thread.start()
     Mark(episodes)
     with open(persist + '\\persist\\mpc-be\\history.mpc_lst', 'w', encoding='utf-8') as file:
         pass
