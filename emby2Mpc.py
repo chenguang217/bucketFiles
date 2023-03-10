@@ -111,24 +111,35 @@ if __name__ == "__main__":
                 # print(response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'])
                 for media in response.json()["MediaSources"][0]['MediaStreams']:
                     if media["Type"] == "Subtitle":
-                        if media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['DisplayLanguage'] == 'Chinese Simplified':
-                            print('selected chinese subtitle')
-                            path = media['Codec']
-                            ifSub = True
-                            index = media['Index']
-                        elif media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['IsExternal']:
-                            path = media['Codec']
-                            ifSub = True
-                            ifExternal = True
-                            index = media['Index']
-                        elif media['IsExternal'] and not ifExternal:
-                            path = media['Codec']
-                            ifSub = True
-                            index = media['Index']
-                        elif media['DisplayLanguage'] == 'Chinese Simplified':
-                            path = media['Codec']
-                            ifSub = True
-                            index = media['Index']
+                        if 'DisplayLanguage' in media.keys():
+                            if media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['DisplayLanguage'] == 'Chinese Simplified':
+                                print('selected chinese subtitle')
+                                path = media['Codec']
+                                ifSub = True
+                                index = media['Index']
+                            elif media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['IsExternal']:
+                                path = media['Codec']
+                                ifSub = True
+                                ifExternal = True
+                                index = media['Index']
+                            elif media['IsExternal'] and not ifExternal:
+                                path = media['Codec']
+                                ifSub = True
+                                index = media['Index']
+                            elif media['DisplayLanguage'] == 'Chinese Simplified':
+                                path = media['Codec']
+                                ifSub = True
+                                index = media['Index']
+                        else:
+                            if media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['IsExternal']:
+                                path = media['Codec']
+                                ifSub = True
+                                ifExternal = True
+                                index = media['Index']
+                            elif media['IsExternal'] and not ifExternal:
+                                path = media['Codec']
+                                ifSub = True
+                                index = media['Index']
                 if ifSub:
                     subtitle = domain + '/emby/videos/' + item['Id'] + '/' + response.json()['MediaSources'][0]['Id'] + '/Subtitles/' + str(index) + '/Stream.' + path + '?api_key=' + token
                     thread = threading.Thread(target=accessSub, args=(subtitle,))
