@@ -10,7 +10,14 @@ import datetime
 
 episodes = []
 record = []
-      
+
+
+class myconf(configparser.ConfigParser):
+    def __init__(self,defaults=None):
+        configparser.ConfigParser.__init__(self,defaults=None)
+    def optionxform(self, optionstr):
+        return optionstr
+
 def Mark(episodes):
     with open(persist + '\\persist\\mpc-be\\history.mpc_lst', 'r', encoding='utf-8') as file:
         content = file.read()
@@ -57,12 +64,22 @@ def accessSub(url):
 def start():
     os.system(persist + '\\apps\\mpc-be\\current\\mpc-be64.exe /play')
 
+def dmitriRender(flag):
+    config = myconf()
+    config.read(persist + '\\apps\\mpc-be\\current\\mpc-be64.ini', encoding='utf-8-sig')
+    if flag:
+        config.set('ExternalFilters\\000', 'Enabled', '1')
+    else:
+        config.set('ExternalFilters\\000', 'Enabled', '0')
+    config.write(open(persist + '\\apps\\mpc-be\\current\\mpc-be64.ini', "w", encoding='utf-8-sig'), space_around_delimiters=False)
+
 if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(os.path.split(os.path.realpath(__file__))[0] + '\\config.ini')
     token = config.get('baseconf', 'token')
     userName = config.get('baseconf', 'userName')
     persist = config.get('baseconf', 'persist')
+    ifDmitri = config.get('baseconf', 'dmitriRender')
     url = sys.argv[1]
     try:
         domain = re.search(r'(http://.+?)/emby', url).group(1)
@@ -91,6 +108,15 @@ if __name__ == "__main__":
         itemId = url.split('/')[5]
         response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
         file.write('1,label,' + response.json()['Items'][0]['Name'] + '\n1,filename,' + target + '\n')
+        if ifDmitri == 'true':
+            response = requests.get(domain + '/emby/Items/' + itemId + '/PlaybackInfo?api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
+            frameRate = response.json()['MediaSources'][0]['MediaStreams'][0]['AverageFrameRate']
+            if frameRate >= 60:
+                # disable dmitriRender
+                dmitriRender(False)
+            else:
+                # enable dmitriRender
+                dmitriRender(True)
         if len(parameter[1].replace('/sub=', '')) != 0:
             file.write('1,subtitle,' + parameter[1].replace('/sub=', '') + '\n')
         episodes.append(url.split(' ')[0])
