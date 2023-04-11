@@ -45,6 +45,7 @@ if __name__ == "__main__":
             zFile = zipfile.ZipFile(os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted\tmp.zip"), "r")
             for fileM in zFile.namelist(): 
                 zFile.extract(fileM, os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted"))
+            zFile.close()
             os.remove(os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted\tmp.zip"))
         elif keys[0] == '@appClientVerMin' and keys[1] == '@deviceAbis' and plugin['@deviceAbis'] == 'x64|x86':
             os.system('mkdir ' + os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted" ))
@@ -54,4 +55,5 @@ if __name__ == "__main__":
             zFile = zipfile.ZipFile(os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted\tmp.zip"), "r")
             for fileM in zFile.namelist(): 
                 zFile.extract(fileM, os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted"))
+            zFile.close()
             os.remove(os.path.join(persist + r"\WeChat\XPlugin\Plugins", plugin['@name'], plugin['@version'] + r"\extracted\tmp.zip"))
