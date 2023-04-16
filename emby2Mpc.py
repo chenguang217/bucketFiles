@@ -109,7 +109,7 @@ if __name__ == "__main__":
         response = requests.get(domain + '/emby/Items?Ids=' + itemId + '&api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
         file.write('1,label,' + response.json()['Items'][0]['Name'] + '\n1,filename,' + target + '\n')
         if ifDmitri == 'true':
-            response = requests.get(domain + '/emby/Items/' + itemId + '/PlaybackInfo?api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
+            response2 = requests.get(domain + '/emby/Items/' + itemId + '/PlaybackInfo?api_key=' + token, proxies={'http': None, 'https': None}, verify = False)
             frameRate = response.json()['MediaSources'][0]['MediaStreams'][0]['AverageFrameRate']
             if frameRate >= 60:
                 # disable dmitriRender
