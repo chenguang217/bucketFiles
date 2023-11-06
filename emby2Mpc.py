@@ -157,7 +157,9 @@ if __name__ == "__main__":
                                 ifSub = True
                                 index = media['Index']
                         else:
-                            if media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['IsExternal']:
+                            if 'DefaultSubtitleStreamIndex' not in response.json()["MediaSources"][0].keys():
+                                pass
+                            elif media['Index'] == response.json()["MediaSources"][0]['DefaultSubtitleStreamIndex'] and media['IsExternal']:
                                 path = media['Codec']
                                 ifSub = True
                                 ifExternal = True
